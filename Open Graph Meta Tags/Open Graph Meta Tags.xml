@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<Collection name="Open Graph Meta Tags" guid="{E4FAFB02-D4B2-4336-8956-A1DE68291C3B}" system="No" updatable="Yes" blockNavigatorNode="No">
+	<HelpLink>http://support.contensive.com/Open-Graph-Meta-Tags</HelpLink>
+	<Help></Help>
+	<Addon name="Open Graph Settings" guid="{C8304551-7A85-400E-8DAC-DB3832A603DE}" type="Setting">
+		<Copy></Copy>
+		<CopyText></CopyText>
+		<ActiveXProgramID></ActiveXProgramID>
+		<DotNetClass></DotNetClass>
+		<ArgumentList></ArgumentList>
+		<AsAjax>No</AsAjax>
+		<Filter>No</Filter>
+		<Help><![CDATA[<p>Settings used when creating Open Graph META tags.</p>]]></Help>
+		<HelpLink><![CDATA[http://support.contensive.com/Open-Graph-Meta-Tags]]></HelpLink>
+		<Icon Link="http://support.contensive.com/hlpRsrc/opengraphSettings.png" width="57" height="59" sprites="4" />
+		<InIframe>No</InIframe>
+		<BlockEditTools>No</BlockEditTools>
+		<FormXML><![CDATA[<Form>
+		<Description>Open Graph Meta Tag Settings</Description>
+		<Tab name="Facebook" heading="FaceBook" description="Settings that affect Facebook">
+			<SiteProperty caption="Facebook Admins" name="facebook admin Id list" ReadOnly="0" Type="text" Selector="" Description="A comma separated list of Facebook ID numbers for the people who can administer this page."></SiteProperty>
+		</Tab>
+		<Tab name="Open Graph" heading="Default Settings" description="Default settings for some Open Graph Tags">
+			<SiteProperty caption="Site Name" name="open graph site name" ReadOnly="0" Type="text" Selector="" Description="The human-readable name for your site that is sent out in an open graph meta tag."></SiteProperty>
+			<SiteProperty caption="Default Page Image" name="pageImageFilename" ReadOnly="0" Type="ImageFile" Selector="" Description="This image is used as default image for the open graph meta tags."></SiteProperty>
+		</Tab>
+</Form>]]></FormXML>
+		<IsInline>No</IsInline>
+		<JavascriptOnLoad></JavascriptOnLoad>
+		<JavascriptInHead></JavascriptInHead>
+		<JavascriptBodyEnd></JavascriptBodyEnd>
+		<MetaDescription></MetaDescription>
+		<OtherHeadTags></OtherHeadTags>
+		<Content>No</Content>
+		<Template>No</Template>
+		<Admin>Yes</Admin>
+		<OnPageEndEvent>No</OnPageEndEvent>
+		<OnPageStartEvent>No</OnPageStartEvent>
+		<OnBodyStart>No</OnBodyStart>
+		<OnBodyEnd>No</OnBodyEnd>
+		<RemoteMethod>No</RemoteMethod>
+		<ProcessRunOnce>No</ProcessRunOnce>
+		<ProcessInterval>0</ProcessInterval>
+		<PageTitle></PageTitle>
+		<RemoteAssetLink></RemoteAssetLink>
+		<Styles></Styles>
+		<Scripting Language="" EntryPoint="" Timeout="5000"/>
+	</Addon>
+	<Addon name="Set Open Graph Meta Tags From Vars" guid="{13231CF9-C06D-4748-83F4-A49545C1B4DA}" type="Add-on">
+		<Copy></Copy>
+		<CopyText></CopyText>
+		<ActiveXProgramID></ActiveXProgramID>
+		<DotNetClass></DotNetClass>
+		<ArgumentList></ArgumentList>
+		<AsAjax>No</AsAjax>
+		<Filter>No</Filter>
+		<Help><![CDATA[<p>This add-on is only run when called either by Set Page Open Graph meta Tags or programmatically by a developer in another add-on. A check is run initially to see if the add-on has already been called. This way we can block the one that runs every page when calling from another add-on.<br></p>]]></Help>
+		<HelpLink><![CDATA[http://support.contensive.com/Open-Graph-Meta-Tags]]></HelpLink>
+		<Icon Link="http://support.contensive.com/hlpRsrc/opengraph.png" width="57" height="59" sprites="4" />
+		<InIframe>No</InIframe>
+		<BlockEditTools>No</BlockEditTools>
+		<FormXML></FormXML>
+		<IsInline>No</IsInline>
+		<JavascriptOnLoad></JavascriptOnLoad>
+		<JavascriptInHead></JavascriptInHead>
+		<JavascriptBodyEnd></JavascriptBodyEnd>
+		<MetaDescription></MetaDescription>
+		<OtherHeadTags></OtherHeadTags>
+		<Content>No</Content>
+		<Template>No</Template>
+		<Admin>No</Admin>
+		<OnPageEndEvent>No</OnPageEndEvent>
+		<OnPageStartEvent>No</OnPageStartEvent>
+		<OnBodyStart>No</OnBodyStart>
+		<OnBodyEnd>No</OnBodyEnd>
+		<RemoteMethod>No</RemoteMethod>
+		<ProcessRunOnce>No</ProcessRunOnce>
+		<ProcessInterval>0</ProcessInterval>
+		<PageTitle></PageTitle>
+		<RemoteAssetLink></RemoteAssetLink>
+		<Styles></Styles>
+		<Scripting Language="VBScript" EntryPoint="GetContent" Timeout="5000">
+		<Code><![CDATA[function getContent()
+	'
+	dim title
+	dim image
+	dim description
+	dim contentType
+	dim url
+	dim siteName
+	dim admins
+	'
+	'	add on can be called from other addons this ensures it is only called once per page
+	'
+	if not cp.utils.encodeBoolean(ccLib.GetViewingProperty("Block Page Open Graph")) then
+		'
+		title = cp.doc.var("Open Graph Title")
+		image = cp.doc.var("Open Graph Image")
+		description = cp.doc.var("Open Graph Description")
+		contentType = cp.doc.var("Open Graph Content Type")
+		url = cp.doc.var("Open Graph URL")
+		siteName = cp.doc.var("Open Graph Site Name")
+		admins = cp.doc.var("Open Graph Admins")
+		'
+		'	title appears to be required - if not set, use the page name
+		'
+		if title = "" then
+			title = cp.Doc.PageName
+		end if
+		'
+		'	image is a required tag for Facebook - if not set use the Contensive logo
+		'
+		if image = "" then
+			image = cp.site.GetProperty("pageImageFilename")
+			if image <> "" then
+				image = "http://" & cp.Site.Domain & cp.site.FilePath & cp.Utils.EncodeUrl(image)
+			else
+				image = "http://" & cp.Site.Domain & "/ccLib/images/ccLibLogin.GIF"
+			end if
+		else
+			image = cp.Utils.EncodeUrl(image)
+		end if
+		'
+		'	if content type is not set, pull it from default default
+		'		set in Open Graph Settings
+		'
+		if contentType = "" then
+			contentType = "website"
+		end if
+		'
+		'	site name
+		'
+		siteName = cp.site.GetProperty("open graph site name")
+		'
+		'	if admins is not set, pull it from default default
+		'		set in Open Graph Settings
+		'
+		if admins = "" then
+			admins = cp.site.GetProperty("facebook admin Id list")
+		end if
+		'
+		'	condition Title and Description
+		'
+		title = cp.Utils.ConvertHTML2Text(title)
+		description = cp.Utils.ConvertHTML2Text(description)
+		'
+		call cp.doc.addHeadTag("<meta property=""og:title"" content=""" & title & """ />")
+		call cp.doc.addHeadTag("<meta property=""og:image"" content=""" & image & """ />")
+		call cp.doc.addHeadTag("<meta property=""og:description"" content=""" & description & """ />")
+		call cp.doc.addHeadTag("<meta property=""og:type"" content=""" & contentType & """ />")
+		call cp.doc.addHeadTag("<meta property=""og:url"" content=""" & url & """ />")
+		call cp.doc.addHeadTag("<meta property=""og:site_name"" content=""" & siteName & """ />")
+		call cp.doc.addHeadTag("<meta property=""fb:admins"" content=""" & admins & """ />")
+		'
+		'	only allow this addon to run once per page
+		'
+		Call ccLib.SetViewingProperty("Block Page Open Graph", "true")
+	end if
+	'
+end function
+
+
+
+]]></Code>
+		</Scripting>
+	</Addon>
+	<Addon name="Set Page Open Graph Meta Tags" guid="{3C90FF4D-0240-4872-B379-06931FF56969}" type="Add-on">
+		<Copy></Copy>
+		<CopyText></CopyText>
+		<ActiveXProgramID></ActiveXProgramID>
+		<DotNetClass></DotNetClass>
+		<ArgumentList></ArgumentList>
+		<AsAjax>No</AsAjax>
+		<Filter>No</Filter>
+		<Help><![CDATA[<p>This add-on runs on every page, setting META data from the page record into the Open Graph META tags.<br></p>]]></Help>
+		<HelpLink><![CDATA[http://support.contensive.com/Open-Graph-Meta-Tags]]></HelpLink>
+		<Icon Link="http://support.contensive.com/hlpRsrc/opengraphPage.png" width="57" height="59" sprites="4" />
+		<InIframe>No</InIframe>
+		<BlockEditTools>No</BlockEditTools>
+		<FormXML></FormXML>
+		<IsInline>No</IsInline>
+		<JavascriptOnLoad></JavascriptOnLoad>
+		<JavascriptInHead></JavascriptInHead>
+		<JavascriptBodyEnd></JavascriptBodyEnd>
+		<MetaDescription></MetaDescription>
+		<OtherHeadTags></OtherHeadTags>
+		<Content>No</Content>
+		<Template>No</Template>
+		<Admin>No</Admin>
+		<OnPageEndEvent>No</OnPageEndEvent>
+		<OnPageStartEvent>No</OnPageStartEvent>
+		<OnBodyStart>No</OnBodyStart>
+		<OnBodyEnd>Yes</OnBodyEnd>
+		<RemoteMethod>No</RemoteMethod>
+		<ProcessRunOnce>No</ProcessRunOnce>
+		<ProcessInterval>0</ProcessInterval>
+		<PageTitle></PageTitle>
+		<RemoteAssetLink></RemoteAssetLink>
+		<Styles></Styles>
+		<Scripting Language="" EntryPoint="" Timeout="5000">
+		<Code><![CDATA[function m
+	dim cs
+	dim imageFilename
+	dim s
+	dim pageId
+	'
+	pageId = cp.doc.pageId
+	set cs = cp.csNew
+	call cs.Open( "page content", "id=" & pageId, "imageFilename" )
+	if cs.ok then
+		imageFilename = cs.getText("imageFilename")
+		if imageFilename <>"" then
+			call ccLib.SetViewingProperty("Open Graph Image", "http://" & cp.site.Domain & cp.site.filepath & imageFilename)
+		end if
+	end if
+	call cs.close
+	'
+	' temp solution - meta content should be moved back to page content
+	'
+	s = cp.site.getProperty( "facebook site_name" )
+	if s="" then
+		s = cp.site.name
+	end if
+	'
+	call ccLib.SetViewingProperty("Open Graph Site Name", cp.utils.encodeHtml(s))
+	call ccLib.SetViewingProperty("Open Graph Content Type", "website")
+	call ccLib.SetViewingProperty("Open Graph URL", cp.content.getPageLink(pageId))
+	'
+	call cs.Open( "meta content", "(recordid=" & cp.doc.pageId & ")" )
+	if cs.ok then
+		s = cs.getText("name")
+		if s = "" then
+			s = cp.doc.pageName
+		end if
+		call ccLib.SetViewingProperty("Open Graph Title", cStr(s))
+		'
+		s = cs.getText("metadescription")
+		if s="" then
+			s = cp.doc.pageName
+		end if
+		'
+		call ccLib.SetViewingProperty("Open Graph Description", cStr(s))
+		'
+	end if
+	call cs.close
+	'
+	'	call the addon that reads the vars and creates the open grpah meta tags
+	'
+	cp.utils.executeAddon("{13231CF9-C06D-4748-83F4-A49545C1B4DA}")
+	'
+end function
+
+
+
+]]></Code>
+		</Scripting>
+	</Addon>
+	<CDef Name="Page Content" guid="{02203F58-0921-4F75-A089-0EAD6E8FEB4F}" >
+		<Field Name="ImageFilename" active="True" AdminOnly="False" Authorable="True" Caption="Page Thumbnail" DeveloperOnly="False" EditSortPriority="2000" FieldType="File" HTMLContent="False" IndexColumn="99" IndexSortDirection="" IndexSortOrder="0" IndexWidth="0" RedirectID="" RedirectPath="" Required="False" TextBuffered="False" UniqueName="False" DefaultValue="" RSSTitle="False" RSSDescription="False" MemberSelectGroupID="0" EditTab="Features" Scramble="False" LookupList="" NotEditable="False" Password="False" ReadOnly="False" ManyToManyRulePrimaryField="" ManyToManyRuleSecondaryField="" IsModified="False" IsBaseField="False" LookupContent="" RedirectContent="" ManyToManyContent="" ManyToManyRuleContent="" ></Field>
+	</CDef>
+</Collection>
